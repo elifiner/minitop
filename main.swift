@@ -8,15 +8,17 @@ struct AppSettings: Codable {
     var lastURL: String
     var recentURLs: [String]
     var stayOnTop: Bool
+    var mobileMode: Bool
     
     init() {
         lastURL = KEEP_URL
         recentURLs = [KEEP_URL]
         stayOnTop = false
+        mobileMode = true
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     var window: NSWindow!
     var webView: WKWebView!
     var settings: AppSettings = AppSettings()
@@ -34,6 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupWebView()
         loadURL(settings.lastURL)
         updateStayOnTopMenuItem()
+        updateMobileModeMenuItem()
     }
     
     func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {
@@ -78,6 +81,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         let stayOnTopItem = NSMenuItem(title: "Stay On Top", action: #selector(toggleStayOnTop), keyEquivalent: "t")
         appMenu.addItem(stayOnTopItem)
+        
+        let mobileItem = NSMenuItem(title: "Mobile Mode", action: #selector(toggleMobileMode), keyEquivalent: "m")
+        appMenu.addItem(mobileItem)
         
         appMenu.addItem(NSMenuItem.separator())
         appMenu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
@@ -129,6 +135,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         updateStayOnTopMenuItem()
     }
     
+    @objc private func toggleMobileMode() {
+        settings.mobileMode.toggle()
+        updateUserAgent()
+        updateMobileModeMenuItem()
+        webView.reload()
+    }
+    
     private func updateWindowLevel() {
         window.level = settings.stayOnTop ? .floating : .normal
     }
@@ -138,10 +151,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         stayOnTopItem.state = settings.stayOnTop ? .on : .off
     }
     
+    private func updateMobileModeMenuItem() {
+        guard let mobileItem = NSApp.mainMenu?.item(at: 0)?.submenu?.item(withTitle: "Mobile Mode") else { return }
+        mobileItem.state = settings.mobileMode ? .on : .off
+    }
+    
+    private func updateUserAgent() {
+        let userAgent = settings.mobileMode ? 
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" :
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        webView.customUserAgent = userAgent
+    }
+    
     private func setupWebView() {
         webView = WKWebView(frame: window.contentView!.bounds)
         webView.autoresizingMask = [.width, .height]
-        webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        updateUserAgent()
         window.contentView!.addSubview(webView)
     }
     
