@@ -1,6 +1,8 @@
 # MiniTop
 
-Turn any website into a desktop app. Keep your favorite web tools always accessible and always on top!
+Turn any website into an always-on-top desktop app.
+
+Perfect For: Gmail, Slack, Google Keep, dashboards, timers, or any web tool you want always visible.
 
 ## Download
 
@@ -21,10 +23,6 @@ Requires macOS 10.15+
 - **⌘T** - Stay on top of other windows
 - **Recent URLs** - Quick access to browsing history
 - **Auto-save** - Remembers your last site and preferences
-
-## Perfect For
-
-Gmail, Slack, Google Keep, dashboards, timers, or any web tool you want always visible.
 
 ## Troubleshooting
 
