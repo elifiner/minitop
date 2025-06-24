@@ -9,16 +9,24 @@ struct AppSettings: Codable {
     var recentURLs: [String]
     var stayOnTop: Bool
     var mobileMode: Bool
+    var windowX: CGFloat
+    var windowY: CGFloat
+    var windowWidth: CGFloat
+    var windowHeight: CGFloat
     
     init() {
         lastURL = KEEP_URL
         recentURLs = [KEEP_URL]
         stayOnTop = false
         mobileMode = true
+        windowX = 100
+        windowY = 100
+        windowWidth = 800
+        windowHeight = 600
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, NSWindowDelegate {
     var window: NSWindow!
     var webView: WKWebView!
     var settings: AppSettings = AppSettings()
@@ -49,15 +57,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     
     private func setupWindow() {
         window = NSWindow(
-            contentRect: NSRect(x: 100, y: 100, width: 800, height: 600),
+            contentRect: NSRect(x: settings.windowX, y: settings.windowY, width: settings.windowWidth, height: settings.windowHeight),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
         window.title = "MiniTop"
+        window.delegate = self
         updateWindowLevel()
         window.makeKeyAndOrderFront(nil)
-        window.center()
     }
     
     private func setupMenu() {
@@ -235,6 +243,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         alert.alertStyle = .warning
         alert.addButton(withTitle: "OK")
         alert.runModal()
+    }
+    
+    // MARK: - NSWindowDelegate
+    
+    func windowDidMove(_ notification: Notification) {
+        saveWindowState()
+    }
+    
+    func windowDidResize(_ notification: Notification) {
+        saveWindowState()
+    }
+    
+    private func saveWindowState() {
+        guard !window.isMiniaturized && window.isVisible else { return }
+        
+        let frame = window.frame
+        settings.windowX = frame.origin.x
+        settings.windowY = frame.origin.y
+        settings.windowWidth = frame.size.width
+        settings.windowHeight = frame.size.height
     }
 }
 

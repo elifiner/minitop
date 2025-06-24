@@ -1,12 +1,14 @@
 # MiniTop
 
+<img src="minitop.png" alt="MiniTop Icon" width="128" height="128">
+
 Turn any website into an always-on-top desktop app.
 
 Perfect For: Gmail, Slack, Google Keep, dashboards, timers, or any web tool you want always visible.
 
 ## Download
 
-**[Download MiniTop](downloads/MiniTop-universal.zip)** - Works on all Macs (Intel and Apple Silicon)
+**[Download MiniTop](downloads/MiniTop.app.zip)** - Works on all Macs (Intel and Apple Silicon)
 
 Requires macOS 10.15+
 
