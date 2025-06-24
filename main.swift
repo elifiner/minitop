@@ -115,6 +115,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         input.stringValue = webView.url?.absoluteString ?? settings.lastURL
         alert.accessoryView = input
         
+        input.selectText(nil)
+        
         if alert.runModal() == .alertFirstButtonReturn {
             let urlString = input.stringValue
             if !urlString.isEmpty {
@@ -166,6 +168,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     private func setupWebView() {
         webView = WKWebView(frame: window.contentView!.bounds)
         webView.autoresizingMask = [.width, .height]
+        webView.navigationDelegate = self
         updateUserAgent()
         window.contentView!.addSubview(webView)
     }
@@ -178,14 +181,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         
         if let url = URL(string: finalURL) {
             webView.load(URLRequest(url: url))
-            addToRecent(finalURL)
-            settings.lastURL = finalURL
         }
     }
     
     private func addToRecent(_ url: String) {
-        settings.recentURLs.removeAll { $0 == url }
-        settings.recentURLs.insert(url, at: 0)
+        guard let urlObj = URL(string: url), let host = urlObj.host else { return }
+        
+        let baseURL = "\(urlObj.scheme ?? "https")://\(host)"
+        
+        settings.recentURLs.removeAll { 
+            guard let existingURL = URL(string: $0), let existingHost = existingURL.host else { return false }
+            return existingHost == host
+        }
+        settings.recentURLs.insert(baseURL, at: 0)
         settings.recentURLs = Array(settings.recentURLs.prefix(10))
         updateRecentMenu()
     }
@@ -201,6 +209,32 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         if let encoded = try? JSONEncoder().encode(settings) {
             try? encoded.write(to: settingsURL)
         }
+    }
+    
+    // MARK: - WKNavigationDelegate
+    
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        if let url = webView.url?.absoluteString {
+            addToRecent(url)
+            settings.lastURL = url
+        }
+    }
+    
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        showErrorAlert(error)
+    }
+    
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        showErrorAlert(error)
+    }
+    
+    private func showErrorAlert(_ error: Error) {
+        let alert = NSAlert()
+        alert.messageText = "Failed to Load URL"
+        alert.informativeText = error.localizedDescription
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
     }
 }
 
