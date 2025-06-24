@@ -8,7 +8,7 @@ Perfect For: Gmail, Slack, Google Keep, dashboards, timers, or any web tool you 
 
 ## Download
 
-**[Download MiniTop](downloads/MiniTop.app.zip)** - Works on all Macs (Intel and Apple Silicon)
+**[Download MiniTop](https://github.com/elifiner/minitop/raw/refs/heads/main/downloads/MiniTop.app.zip)** - Works on all Macs (Intel and Apple Silicon)
 
 Requires macOS 10.15+
 
