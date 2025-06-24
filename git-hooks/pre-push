@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "Running pre-push hook..."
+
+# Run the build to ensure it works and updates the download
+if ! ./build.sh; then
+    echo "❌ Build failed! Push aborted."
+    exit 1
+fi
+
+echo "✅ Build successful! Proceeding with push..."
+exit 0 
